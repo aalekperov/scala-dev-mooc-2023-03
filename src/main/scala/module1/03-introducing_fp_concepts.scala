@@ -216,36 +216,55 @@ object hof{
       case Option.Some(v) => f(v)
       case Option.None => Option.None
     }
+
+    /**
+     *
+     * Реализовать метод printIfAny, который будет печатать значение, если оно есть
+     */
+
+    def printIfAny(): Unit = this match {
+      case Option.Some(v) => println(v)
+      case Option.None =>
+    }
+
+    /**
+     *
+     * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
+     */
+
+    def zip[TT >: T, B](v: Option[B]): Option[(T, B)] = this match {
+      case Option.Some(value) if !v.isEmpty=> Option.Some(value, v.get)
+      case _ => Option.None
+    }
+
+
+    /**
+     *
+     * Реализовать метод filter, который будет возвращать не пустой Option
+     * в случае если исходный не пуст и предикат от значения = true
+     */
+
+    def filter(prediction: T => Boolean): Option[T] = {
+      if (!this.isEmpty && prediction(this.get)) this else Option.None
+    }
+
+
+    /**
+     * Вспомогательная функция для извлечения значения Option.
+     *
+     */
+
+    private def get: T = this match {
+      case Option.Some(v) => v
+      case Option.None => throw new NullPointerException("Option is empty")
+    }
+
   }
 
-  object Option{
-
+  object Option {
     case class Some[T](v: T) extends Option[T]
     case object None extends Option[Nothing]
   }
-
-
-
-
-
-  /**
-   *
-   * Реализовать метод printIfAny, который будет печатать значение, если оно есть
-   */
-
-
-  /**
-   *
-   * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
-   */
-
-
-  /**
-   *
-   * Реализовать метод filter, который будет возвращать не пустой Option
-   * в случае если исходный не пуст и предикат от значения = true
-   */
-
  }
 
  object list {
