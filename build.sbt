@@ -13,7 +13,7 @@ scalaVersion := "2.13.8"
 
 // It's possible to define many kinds of settings, such as:
 
-name := "scala-dev-mooc-2023-03"
+name := "scala-dev-training"
 organization := "ru.otus"
 version := "1.0"
 
