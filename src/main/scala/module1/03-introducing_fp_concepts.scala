@@ -277,8 +277,6 @@ object hof{
  }
 
 
-
-
  object list {
    /**
     *
@@ -326,7 +324,7 @@ object hof{
        def loop(list: List[T], acc: List[T]): List[T] = {
          list match {
            case List.Nil => acc
-           case List.::(head, tail) => loop(tail, List.::(head, acc))
+           case List.::(head, tail) => loop(tail, acc.cons(head))
          }
        }
        loop(this, List())
@@ -341,9 +339,9 @@ object hof{
        @tailrec
        def loop(list: List[T], acc: List[B]): List[B] = list match {
          case List.Nil => acc
-         case List.::(head, tail) => loop(tail, List.::(f(head), acc))
+         case List.::(head, tail) => loop(tail, acc.cons(f(head)))
        }
-       loop(this, List())
+       loop(this, List()).reverse
      }
 
      /**
@@ -353,11 +351,11 @@ object hof{
      def filter(prediction: T => Boolean): List[T] = {
        @tailrec
        def loop(list: List[T], acc: List[T]): List[T] = list match {
-         case List.::(head, tail) if prediction(head) => loop(tail, List.::(head, acc))
+         case List.::(head, tail) if prediction(head) => loop(tail, acc.cons(head))
          case List.::(head, tail) if !prediction(head) => loop(tail, acc)
          case List.Nil => acc
        }
-       loop(this, List())
+       loop(this, List()).reverse
      }
 
 
@@ -382,12 +380,11 @@ object hof{
    List(1, 2, 3, 4)
 
     def main(args: Array[String]): Unit = {
-//      println(List(1, 2, 3, 4).mkString(","))
-//      println(List.Nil.mkString(","))
+      println(List(1, 2, 3, 4).mkString(","))
       println(List(1, 2, 3, 4).filter(x => x >= 3))
+      println(List(1, 2, 3, 4).map(x => x + 3))
       println(incList(List(1, 2, 3, 4)))
-      assert(List(2, 3, 4, 5) == incList(List(1, 2, 3, 4)))
-
+      println(shoutString(List("A", "a")))
     }
 
 
@@ -400,17 +397,11 @@ object hof{
 
 
 
-
-
-
-
-
-
-
     /**
       *
       * Написать функцию shoutString котрая будет принимать список String и возвращать список,
       * где к каждому элементу будет добавлен префикс в виде '!'
       */
+   def shoutString(input: List[String]): List[String] = input.map("!" + _)
 
  }
