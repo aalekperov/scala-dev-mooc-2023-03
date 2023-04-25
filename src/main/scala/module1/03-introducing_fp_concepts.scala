@@ -80,7 +80,7 @@ object recursion {
     @tailrec
     def loop(i: Int, acc: Int): Int = {
       if(i <= 0) acc
-      else loop(i - 1, n * acc)
+      else loop(i - 1, i * acc)
     }
     loop(n, 1)
   }
@@ -90,9 +90,21 @@ object recursion {
   /**
    * реализовать вычисление N числа Фибоначчи
    * F0 = 0, F1 = 1, Fn = Fn-1 + Fn - 2
-   *
+   * 0, 1, 1, 2, 3, 5, 8
    */
 
+  def fibonacci(n: Int): Int = {
+    @tailrec
+    def loop(i: Int, acc1: Int, acc2: Int): Int = i match {
+      case 0 => acc1
+      case 1 => acc2
+      case _ => loop(i - 1, acc2, acc1 + acc2)
+    }
+    loop(n, 0, 1)
+  }
+  def main(args: Array[String]): Unit = {
+    println(fibonacci(10))
+  }
 
 }
 
