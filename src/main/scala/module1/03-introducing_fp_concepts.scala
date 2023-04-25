@@ -3,7 +3,7 @@ package module1
 import java.util.UUID
 import scala.annotation.tailrec
 import java.time.Instant
-
+import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 
 
@@ -265,7 +265,19 @@ object hof{
     case class Some[T](v: T) extends Option[T]
     case object None extends Option[Nothing]
   }
+
+  def main(args: Array[String]): Unit = {
+    Option.None.printIfAny()
+    Option.Some(12).printIfAny()
+    Option.Some(21).zip(Option.None).printIfAny()
+    Option.Some("Scala").filter(value => value.contains("a")).printIfAny()
+
+  }
+
  }
+
+
+
 
  object list {
    /**
@@ -276,14 +288,92 @@ object hof{
     * Cons - непустой, содердит первый элемент (голову) и хвост (оставшийся список)
     */
 
-    trait List[+T]{
+    sealed trait List[+T] {
 
-    }
+     /**
+      * Метод cons, добавляет элемент в голову списка, для этого метода можно воспользоваться названием `::`
+      *
+      */
 
-    object List{
+     def cons[TT >: T](elem: TT): List[TT] = this match {
+       case List.::(_, _) => List.::(elem, this)
+       case List.Nil => List.::(elem, List.Nil)
+     }
+
+     /**
+      * Метод mkString возвращает строковое представление списка, с учетом переданного разделителя
+      *
+      */
+     def mkString(separator: String): String = {
+       @tailrec
+       def loop(list: List[T], acc: StringBuilder): StringBuilder = {
+         list match {
+           case List.Nil => acc
+           case List.::(head, List.Nil) => acc.append(s"$head")
+           case List.::(head, tail) => loop(tail, acc.append(s"$head$separator"))
+         }
+       }
+       loop(this, new StringBuilder("")).toString()
+     }
+
+     /**
+      *
+      * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
+      */
+
+     def reverse: List[T] = {
+       @tailrec
+       def loop(list: List[T], acc: List[T]): List[T] = {
+         list match {
+           case List.Nil => acc
+           case List.::(head, tail) => loop(tail, List.::(head, acc))
+         }
+       }
+       loop(this, List())
+     }
+
+
+     /**
+      *
+      * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
+      */
+     def map[B](f: T => B): List[B] = {
+       @tailrec
+       def loop(list: List[T], acc: List[B]): List[B] = list match {
+         case List.Nil => acc
+         case List.::(head, tail) => loop(tail, List.::(f(head), acc))
+       }
+       loop(this, List())
+     }
+
+     /**
+      *
+      * Реализовать метод filter для списка который будет фильтровать список по некому условию
+      */
+     def filter(prediction: T => Boolean): List[T] = {
+       @tailrec
+       def loop(list: List[T], acc: List[T]): List[T] = list match {
+         case List.::(head, tail) if prediction(head) => loop(tail, List.::(head, acc))
+         case List.::(head, tail) if !prediction(head) => loop(tail, acc)
+         case List.Nil => acc
+       }
+       loop(this, List())
+     }
+
+
+   }
+
+    object List {
       case class ::[A](head: A, tail: List[A]) extends List[A]
       case object Nil extends List[Nothing]
 
+      /**
+       * Конструктор, позволяющий создать список из N - го числа аргументов
+       * Для этого можно воспользоваться *
+       *
+       * Например вот этот метод принимает некую последовательность аргументов с типом Int и выводит их на печать
+       * def printArgs(args: Int*) = args.foreach(println(_))
+       */
       def apply[A](v: A*): List[A] =
         if(v.isEmpty) List.Nil
         else ::(v.head, apply(v.tail:_*))
@@ -291,46 +381,30 @@ object hof{
 
    List(1, 2, 3, 4)
 
+    def main(args: Array[String]): Unit = {
+//      println(List(1, 2, 3, 4).mkString(","))
+//      println(List.Nil.mkString(","))
+      println(List(1, 2, 3, 4).filter(x => x >= 3))
+      println(incList(List(1, 2, 3, 4)))
+      assert(List(2, 3, 4, 5) == incList(List(1, 2, 3, 4)))
+
+    }
+
 
    /**
-     * Метод cons, добавляет элемент в голову списка, для этого метода можно воспользоваться названием `::`
-     *
-     */
-
-    /**
-      * Метод mkString возвращает строковое представление списка, с учетом переданного разделителя
-      *
-      */
-
-    /**
-      * Конструктор, позволяющий создать список из N - го числа аргументов
-      * Для этого можно воспользоваться *
-      * 
-      * Например вот этот метод принимает некую последовательность аргументов с типом Int и выводит их на печать
-      * def printArgs(args: Int*) = args.foreach(println(_))
-      */
-
-    /**
-      *
-      * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
-      */
-
-    /**
-      *
-      * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
-      */
+    *
+    * Написать функцию incList котрая будет принимать список Int и возвращать список,
+    * где каждый элемент будет увеличен на 1
+    */
+   def incList(input: List[Int]): List[Int] = input.map(_ + 1)
 
 
-    /**
-      *
-      * Реализовать метод filter для списка который будет фильтровать список по некому условию
-      */
 
-    /**
-      *
-      * Написать функцию incList котрая будет принимать список Int и возвращать список,
-      * где каждый элемент будет увеличен на 1
-      */
+
+
+
+
+
 
 
     /**
