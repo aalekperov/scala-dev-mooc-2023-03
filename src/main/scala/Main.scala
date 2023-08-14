@@ -9,6 +9,7 @@ import scala.language.postfixOps
 import scala.util.Try
 import module3.functional_effects.functionalProgram.executableEncoding
 import module3.functional_effects.functionalProgram.declarativeEncoding
+import module3.zioDS.ref.{updateCounter, updateCounterRef}
 import module3.{multipleErrors, toyModel, zioConcurrency, zioConstructors, zioRecursion}
 import zio.{ExitCode, URIO, ZIO}
 
@@ -92,8 +93,15 @@ object Main {
  //   val r = declarativeEncoding.interpret(declarativeEncoding.p1)
 
   //  zio.Runtime.default.unsafeRun(zioConstructors.z11)
-    zio.Runtime.default.unsafeRun(zioConcurrency
-      .printEffectRunningTime(zioConcurrency.g1))
+
+
+    val eff = ZIO.effect{
+      println("1")
+
+    }.flatMap(_ => ZIO.effect(println("2")))
+
+    val c = updateCounter
+    zio.Runtime.default.unsafeRun(c.map(println))
 
   //  Thread.sleep(2000)
  //   println(zioRecursion.factorial(10000))
