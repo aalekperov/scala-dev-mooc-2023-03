@@ -27,15 +27,21 @@ object task_futures_sequence {
 
 
   def fullSequence[A](futures: List[Future[A]]): Future[(List[A], List[Throwable])] = {
-    val p = Promise[Future[(List[A], List[Throwable])]]
-    val acc: (List[A], List[Throwable]) = futures
-      .foldLeft((List.empty[A], List.empty[Throwable])) { (acc, fut) =>
-        fut.onComplete {
-          case Failure(exception) => (acc._1, exception :: acc._2)
-          case Success(value) => (value :: acc._1, acc._2)
-        }
-        acc
-      }
-    Future(acc)
+    val futureList: Future[List[Try[A]]] = Future.sequence(futures.map(_.transform(Success(_))))
+    val successes: Future[List[A]] = futureList
+      .map(v => v.collect {
+        case Success(x) => x
+      })
+    val failures: Future[List[Throwable]] = futureList
+      .map(v => v.collect {
+        case Failure(x)=>x
+      })
+
+    val res: Future[(List[A], List[Throwable])] = for {
+      successFuture <- successes
+      failedFuture <- failures
+    } yield (successFuture, failedFuture)
+
+    res
   }
 }
