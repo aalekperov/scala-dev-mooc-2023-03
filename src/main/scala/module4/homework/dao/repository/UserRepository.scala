@@ -57,14 +57,18 @@ object UserRepository{
         def createUser(user: User): Result[User] =
             run(userSchema.insert(lift(user))).as(user)
         
-        def createUsers(users: List[User]): Result[List[User]] =
-            run(liftQuery(users).foreach(u => userSchema.insert(lift(u)))).as(users)
-        
+        def createUsers(users: List[User]): Result[List[User]] = {
+            run(liftQuery(users).foreach(usr => query[User].insert(usr))).as(users)
+        }
+
         def updateUser(user: User): Result[Unit] = {
-            val q: Quoted[Update[User]] = quote {
+            val q = quote {
                 userSchema
                   .filter(_.id == lift(user.id))
-                  .update(_.age -> lift(user.age), _.lastName -> lift(user.lastName), _.firstName -> lift(user.firstName))
+                  .update(
+                      _.age -> lift(user.age),
+                      _.lastName -> lift(user.lastName),
+                      _.firstName -> lift(user.firstName))
             }
             val res: Result[Unit] = run(q).map(_ => ())
             res
@@ -81,8 +85,8 @@ object UserRepository{
         def userRoles(userId: UserId): Result[List[Role]] = run(
             for {
                 userToRole <- userToRoleSchema.filter(_.userId == lift(userId.id))
-                role <- roleSchema.filter(_.code == lift(userToRole.roleId))
-            } yield role
+                roles <- roleSchema.join(_.code == userToRole.roleId)
+            } yield roles
         )
         
         def insertRoleToUser(roleCode: RoleCode, userId: UserId): Result[Unit] =
@@ -91,10 +95,9 @@ object UserRepository{
         
         def listUsersWithRole(roleCode: RoleCode): Result[List[User]] = run(
             for {
-                role <- roleSchema.filter(_.code == lift(roleCode.code))
-                userToRole <- userToRoleSchema.filter(_.roleId == lift(role.code))
-                user <- userSchema.filter(_.id == lift(userToRole.userId))
-            } yield user
+                userToRole <- userToRoleSchema.filter(_.roleId == lift(roleCode.code))
+                users <- userSchema.join(_.id == userToRole.userId)
+            } yield users
         )
         
         def findRoleByCode(roleCode: RoleCode): Result[Option[Role]] =
